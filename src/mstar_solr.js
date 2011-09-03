@@ -1,5 +1,21 @@
 var http = require("http");
 
+function createServer(){
+	console.log('server created');
+}
+
+function isAuthorized(clientId){
+	console.log('isAuthorized(' + clientId + ')';
+}
+
+function load_whitelist(filename){
+	console.log('loading whitelist');
+}
+
+function load_blacklist(filename){
+	console.log('loading blacklist');
+}
+
 function start() {
 	function onRequest(request, response) {
 		console.log("Request received.");
