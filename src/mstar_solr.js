@@ -1,8 +1,14 @@
 var http = require("http");
 
-function createServer(){
-	console.log('server created');
+function Server() {
+	if (!(this instanceof Server)) return new Server();
 }
+
+exports.createServer = function() {
+	console.log('server created');
+	this.load_authlist('./data/auth_list.txt'); 
+	return new Server();
+};
 
 function isAuthorized(clientId){
 	console.log('isAuthorized(' + clientId + ')';
