@@ -1,17 +1,17 @@
-var http = require("http");
+var http = require("http"),
+    fs   = require('fs');
 
-function Server() {
-	if (!(this instanceof Server)) return new Server();
+var authorized_clients = []
+
+
+function load_authlist(filename){
+	//console.log('loading application auth list');
+	authorized_clients = JSON.parse(fs.readFileSync(filename));
+	//console.log('loaded ' + authorized_clients.length + ' authorized clients');
 }
 
-exports.createServer = function() {
-	console.log('server created');
-	this.load_authlist('./data/auth_list.txt'); 
-	return new Server();
-};
-
-function isAuthorized(clientId){
-	console.log('isAuthorized(' + clientId + ')';
+function isClientAuthorized(client){
+	return authorized_clients.indexOf(client) > -1;
 }
 
 function load_whitelist(filename){
@@ -35,3 +35,6 @@ function start() {
 }
 
 exports.start = start;
+exports.load_authlist = load_authlist;
+exports.auth_list = function(){ return authorized_clients;};
+exports.isClientAuthorized = isClientAuthorized;
