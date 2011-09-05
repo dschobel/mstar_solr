@@ -5,7 +5,17 @@ var vows = require('vows'),
 
 
 vows.describe('client authorization').addBatch({
-	'when an unauthorized client connects': {
+	'when an the authorization list is loaded': {
+		topic: function(){
+			ms.load_authlist('./data/auth_list.json');
+			return ms.auth_list().length;
+		},
+		'two companies are loaded': function(topic){
+			assert.equal(+topic, 2);
+		}
+	}
+,
+	'and when an unauthorized client connects': {
 		topic: function(){
 			ms.load_authlist('./data/auth_list.json');
 			return ms.isClientAuthorized('foo');
