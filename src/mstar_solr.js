@@ -1,5 +1,7 @@
 var http = require("http"),
-    fs   = require('fs');
+    fs   = require('fs'),
+    solr = require('solr'),
+    express = require('express');
 
 var authorized_clients = []
 
@@ -22,16 +24,35 @@ function load_blacklist(filename){
 	console.log('loading blacklist');
 }
 
-function start() {
-	function onRequest(request, response) {
-		console.log("Request received.");
-		response.writeHead(200, {"Content-Type": "text/plain"});
-		response.write("Hello World");
-		response.end();
+function inspect(obj){
+	var str = "";
+	for(var k in obj){
+	    if (obj.hasOwnProperty(k)){
+		console.log(k + " = " + obj[k] + "\n");
+		}
 	}
 
-	http.createServer(onRequest).listen(8888);
-	console.log("Server has started.");
+}
+
+function handleRequest(req, resp){
+	console.log("Request received.");
+	resp.writeHead(200, {"Content-Type": "text/plain"});
+	resp.write("hello from mstar_solr \n");
+	resp.write('client: ' + req.params.client + "\n");
+	resp.write('query: ' + req.params.query+ "\n");
+	resp.end();
+}
+
+function start(port) {
+	if(port === undefined)
+	{
+	  port = 8888;
+	}
+
+	var app = express.createServer();
+	app.get('/lookup/:client/:query', handleRequest);
+	app.listen(port, "10.61.200.101");
+	console.log("mstar_solr is listening on port " + +port);
 }
 
 exports.start = start;
