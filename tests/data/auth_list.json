@@ -1,1 +1,14 @@
-["westpac","etrade"]
+{
+    "clients": [
+    {
+        "client": "westpac",
+            "white-list": [ 2, 3 ],
+            "black-list": [ 4, 5 ]
+    },
+    {
+        "client": "etrade",
+        "white-list": [ 1, 4 ],
+        "black-list": [ 2, 3 ]
+    }
+    ]
+}

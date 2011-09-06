@@ -4,7 +4,7 @@ var vows = require('vows'),
 
 
 
-vows.describe('client authorization').addBatch({
+var suite = vows.describe('client authorization').addBatch({
 	'when an the authorization list is loaded': {
 		topic: function(){
 			ms.load_authlist('./data/auth_list.json');
@@ -34,5 +34,6 @@ vows.describe('client authorization').addBatch({
 			assert.equal(topic, true);
 		}
 	}
-}).run();
-			 
+});
+
+suite.run();
