@@ -7,6 +7,15 @@ var authorized_clients = {};
 var solr_client = {};
 
 
+function isEmpty(obj){
+    for(var prop in obj) {
+        if(obj.hasOwnProperty(prop))
+            return false;
+    }
+
+    return true;
+}
+
 function load_authlist(filename){
     authorized_clients = JSON.parse(fs.readFileSync(filename)).clients;
 }
@@ -78,6 +87,7 @@ var response;
     }
 
 exports.start = start;
+exports.isEmpty = isEmpty;
 exports.inspect = inspect;
 exports.load_authlist = load_authlist;
 exports.auth_list = function(){ return authorized_clients;};
