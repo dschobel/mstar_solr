@@ -34,25 +34,23 @@ var response;
     function handleRequest(req, resp){
         if(isClientAuthorized(req.params.client))
         {
-            console.log('got an authorized client');
             resp.writeHead(200, {"Content-Type": "text/plain"});
-            resp.write("hello from mstar_solr \n");
-            resp.write('client is authorized to use this tool, hooray!');
             resp.write('client: ' + req.params.client + "\n");
             resp.write('query: ' + req.params.query+ "\n");
-            response =resp;
+            response = resp;
             solr_client.query(req.params.query, function(err,resp){
 
                     if(err)
                     {
-                    console.log('error querying solr: ' + err);
-                    response.end('error');
-                    return;
+                        console.log('error querying solr: ' + err);
+                        response.end('error');
+                        return;
                     }
-                    response.end('success!');
-
+                    var respObj = JSON.parse(resp);
+                    inspect(respObj.response);
+                    response.write('number of matching documents: ' + respObj.response.numFound + '\n');
+                    response.end(JSON.stringify(respObj.response.docs));
                     });
-            //       var respObj = JSON.parse(resp);
         }
         else
         {

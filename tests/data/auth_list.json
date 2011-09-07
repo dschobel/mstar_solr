@@ -2,7 +2,7 @@
     "clients": [
     {
         "client": "westpac",
-            "white-list": [ 2, 3 ],
+            "white-list": [ 'BHP','TLS' ],
             "black-list": [ 4, 5 ]
     },
     {
