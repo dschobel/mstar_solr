@@ -8,7 +8,7 @@ var suite = vows.describe('client authorization').addBatch({
 	'when an the authorization list is loaded': {
 		topic: function(){
 			ms.load_authlist('./data/auth_list.json');
-			return ms.auth_list().length;
+			return ms.auth_list_size();
 		},
 		'two companies are loaded': function(topic){
 			assert.equal(+topic, 2);

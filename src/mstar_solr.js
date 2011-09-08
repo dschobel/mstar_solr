@@ -6,7 +6,6 @@ var http = require("http"),
 
 var authorized_clients = {};
 var solr_client = {};
-var _client ={};
 
 
 function isEmpty(obj){
@@ -14,13 +13,14 @@ function isEmpty(obj){
         if(obj.hasOwnProperty(prop))
             return false;
     }
-
     return true;
 }
 
 function load_authlist(filename){
     authorized_clients = JSON.parse(fs.readFileSync(filename)).clients;
 }
+
+function auth_list_size(){ return authorized_clients.length;}
 
 function getAuthorizedClient(name){
     for(var i=0; i<authorized_clients.length; i++) {
@@ -30,82 +30,71 @@ function getAuthorizedClient(name){
     return null;
 }
 
-function inspect(obj){
-    var str = "";
-    for(var k in obj){
-        if (obj.hasOwnProperty(k)){
-            console.log(k + " = " + obj[k] + "\n");
-        }
-    }
 
+function handleRequest(req, resp){
+    var _client = getAuthorizedClient(req.params.client);
+    if(_client !== null)
+    {
+        resp.writeHead(200, {"Content-Type": "text/plain"});
+        resp.write('client: ' + req.params.client + "\n");
+        resp.write('query: ' + req.params.query+ "\n");
+        var httpResponse = resp;
+        solr_client.query(req.params.query, function(err,resp){
+                if(err)
+                {
+                console.log('error querying solr: ' + err);
+                httpResponse.end('error');
+                return;
+                }
+                var respObj = JSON.parse(resp);
+                httpResponse.write('\n\nwhitelist is :');
+                httpResponse.write(JSON.stringify(_client.white_list));
+                httpResponse.write('\n\nblacklist is :');
+                httpResponse.write(JSON.stringify(_client.black_list));
+                httpResponse.write('\n\nnumber of matching documents: ' + respObj.response.numFound + '\n');
+                httpResponse.write('original results\n');
+                var docs = respObj.response.docs;
+                httpResponse.write(JSON.stringify(docs));
+
+
+                var docs = search.matchArray(docs,_client.white_list);
+                httpResponse.write('\n\n'+docs.length+' document(s) after applying whitelist:\n');
+                httpResponse.write(JSON.stringify(docs));
+
+                docs = search.matchArray(docs,_client.black_list);
+                httpResponse.write('\n\n'+docs.length+' document(s) after applying blacklist:\n');
+                httpResponse.end(JSON.stringify(docs));
+
+        });
+    }
+    else
+    {
+        resp.writeHead(401);
+        resp.end('nein!');
+    }
 }
 
-var response;
 
-    function handleRequest(req, resp){
-        _client = getAuthorizedClient(req.params.client);
-        if(_client !== null)
-        {
-            resp.writeHead(200, {"Content-Type": "text/plain"});
-            resp.write('client: ' + req.params.client + "\n");
-            resp.write('query: ' + req.params.query+ "\n");
-            response = resp;
-            solr_client.query(req.params.query, function(err,resp){
-                    if(err)
-                    {
-                        console.log('error querying solr: ' + err);
-                        response.end('error');
-                        return;
-                    }
-                    var respObj = JSON.parse(resp);
-                    response.write('\n\nwhitelist is :');
-                    response.write(JSON.stringify(_client.white_list));
-                    response.write('\n\nblacklist is :');
-                    response.write(JSON.stringify(_client.black_list));
-                    response.write('\n\nnumber of matching documents: ' + respObj.response.numFound + '\n');
-                    response.write('original results\n');
-                    var docs = respObj.response.docs;
-                    response.write(JSON.stringify(docs));
-
-
-                    var docs = search.matchArray(docs,_client.white_list);
-                    response.write('\n\n'+docs.length+' document(s) after applying whitelist:\n');
-                    response.write(JSON.stringify(docs));
-
-                    docs = search.matchArray(docs,_client.black_list);
-                    response.write('\n\n'+docs.length+' document(s) after applying blacklist:\n');
-                    response.end(JSON.stringify(docs));
-        
-                });
-        }
-        else
-        {
-            resp.writeHead(401);
-            resp.end('nein!');
-        }
+function start(port) {
+    if(port === undefined)
+    {
+        port = 8888;
     }
 
-    function start(port) {
-        if(port === undefined)
-        {
-            port = 8888;
-        }
-
-        solr_client = solr.createClient('ausearchwebdev1','8080','/StockFundUniverse','/ausearch');
+    solr_client = solr.createClient('ausearchwebdev1','8080','/StockFundUniverse','/ausearch');
 
 
-        load_authlist('./tests/data/auth_list.json');
-        console.log('auth list has ' + authorized_clients.length + ' members');
+    load_authlist('./tests/data/auth_list.json');
+    console.log('auth list has ' + authorized_clients.length + ' members');
 
-        var app = express.createServer();
-        app.get('/lookup/:client/:query', handleRequest);
-        app.listen(port, "10.61.200.101");
-        console.log("mstar_solr is listening on port " + +port);
-    }
+    var app = express.createServer();
+    app.get('/lookup/:client/:query', handleRequest);
+    app.listen(port, "10.61.200.101");
+    console.log("mstar_solr is listening on port " + +port);
+}
 
 exports.start = start;
 exports.isEmpty = isEmpty;
-exports.inspect = inspect;
 exports.load_authlist = load_authlist;
-exports.auth_list = function(){ return authorized_clients;};
+exports.auth_list_size = auth_list_size;
 exports.getAuthorizedClient = getAuthorizedClient;
