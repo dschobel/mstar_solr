@@ -18,20 +18,20 @@ var suite = vows.describe('client authorization').addBatch({
 	'and when an unauthorized client connects': {
 		topic: function(){
 			ms.load_authlist('./data/auth_list.json');
-			return ms.isClientAuthorized('foo');
+			return ms.getAuthorizedClient('foo');
 		},
 		'the request is denied': function(topic){
-			assert.equal(topic, false);
+			assert.equal(topic, null);
 		}
 	}
 ,
 	'but when an authorized client connects':{
 		topic: function(){
 			ms.load_authlist('./data/auth_list.json');
-			return ms.isClientAuthorized('westpac');
+			return ms.getAuthorizedClient('westpac');
 		},
 		'the request is accepted': function(topic){
-			assert.equal(topic, true);
+			assert.equal(topic===null, false);
 		}
 	}
 });

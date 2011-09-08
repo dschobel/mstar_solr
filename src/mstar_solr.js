@@ -1,10 +1,12 @@
 var http = require("http"),
     fs   = require('fs'),
     solr = require('solr'),
+    search = require('searchjs'),
     express = require('express');
 
 var authorized_clients = {};
 var solr_client = {};
+var _client ={};
 
 
 function isEmpty(obj){
@@ -20,12 +22,12 @@ function load_authlist(filename){
     authorized_clients = JSON.parse(fs.readFileSync(filename)).clients;
 }
 
-function isClientAuthorized(client){
+function getAuthorizedClient(name){
     for(var i=0; i<authorized_clients.length; i++) {
-        if(client === authorized_clients[i].client)
-            return true;
+        if(name === authorized_clients[i].name)
+            return authorized_clients[i];
     }
-    return false;
+    return null;
 }
 
 function inspect(obj){
@@ -41,14 +43,14 @@ function inspect(obj){
 var response;
 
     function handleRequest(req, resp){
-        if(isClientAuthorized(req.params.client))
+        _client = getAuthorizedClient(req.params.client);
+        if(_client !== null)
         {
             resp.writeHead(200, {"Content-Type": "text/plain"});
             resp.write('client: ' + req.params.client + "\n");
             resp.write('query: ' + req.params.query+ "\n");
             response = resp;
             solr_client.query(req.params.query, function(err,resp){
-
                     if(err)
                     {
                         console.log('error querying solr: ' + err);
@@ -58,8 +60,16 @@ var response;
                     var respObj = JSON.parse(resp);
                     inspect(respObj.response);
                     response.write('number of matching documents: ' + respObj.response.numFound + '\n');
-                    response.end(JSON.stringify(respObj.response.docs));
-                    });
+                    response.write('original results');
+                    var docs = respObj.response.docs;
+                    response.end(JSON.stringify(docs));
+
+                    //response.write('\n\nwhitelist is :\n");
+                    //reponse.write(authorized_clients
+                    //response.write('\n\ndocs list after applying whitelist:\n");
+                    //response.write(JSON.stringify(search.matchArray(docs,
+        
+                });
         }
         else
         {
@@ -91,4 +101,4 @@ exports.isEmpty = isEmpty;
 exports.inspect = inspect;
 exports.load_authlist = load_authlist;
 exports.auth_list = function(){ return authorized_clients;};
-exports.isClientAuthorized = isClientAuthorized;
+exports.getAuthorizedClient = getAuthorizedClient;
