@@ -58,16 +58,23 @@ var response;
                         return;
                     }
                     var respObj = JSON.parse(resp);
-                    inspect(respObj.response);
-                    response.write('number of matching documents: ' + respObj.response.numFound + '\n');
-                    response.write('original results');
+                    response.write('\n\nwhitelist is :');
+                    response.write(JSON.stringify(_client.white_list));
+                    response.write('\n\nblacklist is :');
+                    response.write(JSON.stringify(_client.black_list));
+                    response.write('\n\nnumber of matching documents: ' + respObj.response.numFound + '\n');
+                    response.write('original results\n');
                     var docs = respObj.response.docs;
-                    response.end(JSON.stringify(docs));
+                    response.write(JSON.stringify(docs));
 
-                    //response.write('\n\nwhitelist is :\n");
-                    //reponse.write(authorized_clients
-                    //response.write('\n\ndocs list after applying whitelist:\n");
-                    //response.write(JSON.stringify(search.matchArray(docs,
+
+                    var docs = search.matchArray(docs,_client.white_list);
+                    response.write('\n\n'+docs.length+' document(s) after applying whitelist:\n');
+                    response.write(JSON.stringify(docs));
+
+                    docs = search.matchArray(docs,_client.black_list);
+                    response.write('\n\n'+docs.length+' document(s) after applying blacklist:\n');
+                    response.end(JSON.stringify(docs));
         
                 });
         }

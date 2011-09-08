@@ -3,7 +3,7 @@
         {
             "name":"westpac",
             "white_list": {"type":"ST"},
-            "black_list": {"ticker":"bhp"}
+            "black_list": {"_not":"true","ticker":"bhp"}
         },
         {
             "name":"etrade",
