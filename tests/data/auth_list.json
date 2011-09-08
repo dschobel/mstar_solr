@@ -1,15 +1,14 @@
 {
-    "clients": [
-    {
-        "client": "westpac",
-            "white-list-expr": {type:"ST"},
-            "black-list": {_not:true, ticker:"BHP"}
-    },
-    {
-        "client": "etrade",
-        l
-        "white-list": {_join: "OR", ticker: "bhp", ticker: "tls", ticker:"mip"},
-        "black-list": {}
-    }
+    "clients" :[
+        {
+            "name":"westpac",
+            "white_list": {"type":"ST"},
+            "black_list": {"ticker":"bhp"}
+        },
+        {
+            "name":"etrade",
+            "white_list": {"_join": "OR","terms":[{ "ticker":"bhp"}, {"ticker":"tls"}]},
+            "black_list": {}
+        }
     ]
 }
